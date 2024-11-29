@@ -1,0 +1,12 @@
+<idea-plugin>
+    <id>com.example.idlenotifier</id>
+    <name>Saba Notifier</name>
+    <version>1.0</version>
+    <vendor email="alireza.amirkhani@sabapardazesh.net" url="https://www.sabapardazesh.net">Alireza Amirkhani</vendor>
+
+    <applicationListeners>
+        <listener class="com.example.idlenotifier.IdleListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>
+        <listener class="com.example.idlenotifier.ProjectStateNotifier" topic="com.intellij.openapi.project.ProjectManagerListener"/>
+    </applicationListeners>
+
+</idea-plugin>
