@@ -97,40 +97,68 @@ public class IdleListener implements ApplicationActivationListener, ApplicationL
 
     private void showIdleNotification() {
         if (!notificationDisplayed) {
-            notificationDisplayed = true;
 
-            Timer userResponseTimer = new Timer(USER_RESPONSE_TIMEOUT * 1000, null);
-            userResponseTimer.addActionListener(e -> {
+            notificationDisplayed = true;
+            idleTimer.stop();
+
+            Timer userResponseTimer = new Timer(USER_RESPONSE_TIMEOUT * 1000, e -> {
                 idleTimeStart = System.currentTimeMillis();
                 String systemName = getSystemName();
                 String ipAddress = getIpAddress();
                 long time = System.currentTimeMillis();
                 ServerConnector serverConnector = new ServerConnector();
                 serverConnector.sendRestMessageToServer("/idle", systemName, ipAddress, time, "DeActivate", "");
-                userResponseTimer.stop();
             });
             userResponseTimer.setRepeats(false);
+
             userResponseTimer.start();
 
             String message = String.format("System has been idle for %d minutes!", randomIdleTimeoutMinutes);
-            Messages.showMessageDialog(message, "Idle Notification", Messages.getInformationIcon());
 
-            System.out.println("Ok clicked.");
-            String systemName = getSystemName();
-            String ipAddress = getIpAddress();
-            long time = System.currentTimeMillis();
-            ServerConnector serverConnector = new ServerConnector();
-            serverConnector.sendRestMessageToServer("/idle", systemName, ipAddress, time, "Activate", "");
+            JDialog dialog = new JDialog();
+            dialog.setTitle("Idle Notification");
+            dialog.setSize(300, 150);
+            dialog.setLocationRelativeTo(null);
+            dialog.setAlwaysOnTop(true);
 
-            userResponseTimer.stop();
-            resetIdleTimer();
-            notificationDisplayed = false;
+            JPanel panel = new JPanel();
+            panel.setLayout(new BorderLayout());
 
-            resetRandomIdleTimeout();
-            idleTimer.setInitialDelay(randomIdleTimeoutMinutes * 60 * 1000);
-            idleTimer.restart();
+            JLabel label = new JLabel(message, JLabel.CENTER);
+            panel.add(label, BorderLayout.CENTER);
+
+            JButton okButton = new JButton("OK");
+            okButton.addActionListener(e -> {
+                dialog.dispose();
+                resetIdleTimer();
+                notificationDisplayed = false;
+
+                String systemName = getSystemName();
+                String ipAddress = getIpAddress();
+                long time = System.currentTimeMillis();
+                ServerConnector serverConnector = new ServerConnector();
+                serverConnector.sendRestMessageToServer("/idle", systemName, ipAddress, time, "Activate", "");
+                userResponseTimer.stop();
+                resetRandomIdleTimeout();
+            });
+            panel.add(okButton, BorderLayout.SOUTH);
+
+            JPanel buttonPanel = new JPanel();
+            buttonPanel.add(okButton);
+            panel.add(buttonPanel, BorderLayout.SOUTH);
+
+            dialog.add(panel);
+            dialog.setVisible(true);
+
+//            resetIdleTimer();
+//            notificationDisplayed = false;
+
+//            resetRandomIdleTimeout();
+//            idleTimer.setInitialDelay(randomIdleTimeoutMinutes * 60 * 1000);
+//            idleTimer.restart();
         }
     }
+
 
     private String getSystemName() {
         try {
