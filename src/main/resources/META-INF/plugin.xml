@@ -19,7 +19,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="Remote Working"
                     anchor="bottom"
-                    icon="/icons/start.png"
+                    icon="/icons/pluginIcon.svg"
                     factoryClass="com.example.idlenotifier.IdleNotifierWidgetProvider"/>
     </extensions>
 
