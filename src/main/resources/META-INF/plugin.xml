@@ -4,9 +4,23 @@
     <version>1.0</version>
     <vendor email="alireza.amirkhani@sabapardazesh.net" url="https://www.sabapardazesh.net">Alireza Amirkhani</vendor>
 
+
+    <description>
+        Saba Notifier is a productivity tool that monitors user activity and project states in IntelliJ.
+        It helps track idle periods and manage remote working workflows by integrating with a backend system.
+    </description>
+
+
     <applicationListeners>
         <listener class="com.example.idlenotifier.IdleListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>
         <listener class="com.example.idlenotifier.ProjectStateNotifier" topic="com.intellij.openapi.project.ProjectManagerListener"/>
     </applicationListeners>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="Remote Working"
+                    anchor="bottom"
+                    icon="/icons/start.png"
+                    factoryClass="com.example.idlenotifier.IdleNotifierWidgetProvider"/>
+    </extensions>
 
 </idea-plugin>

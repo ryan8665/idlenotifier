@@ -19,10 +19,11 @@ import java.util.Random;
 public class IdleListener implements ApplicationActivationListener, ApplicationListener {
     private static final int USER_RESPONSE_TIMEOUT = 30;
     private Timer idleTimer;
-    private boolean notificationDisplayed = false;
+    private static boolean notificationDisplayed = false;
     private Long idleTimeStart;
     private final Random random = new Random();
     private int randomIdleTimeoutMinutes;
+    private static boolean isWorking = true;
 
     private static IdleListener instance;
 
@@ -33,6 +34,9 @@ public class IdleListener implements ApplicationActivationListener, ApplicationL
         ApplicationManager.getApplication().getMessageBus().connect().subscribe(AppLifecycleListener.TOPIC, new AppLifecycleListener() {
             @Override
             public void appStarted() {
+                if(!isWorking){
+                    return;
+                }
                 String systemName = getSystemName();
                 String ipAddress = getIpAddress();
                 long time = System.currentTimeMillis();
@@ -43,6 +47,9 @@ public class IdleListener implements ApplicationActivationListener, ApplicationL
 
             @Override
             public void appWillBeClosed(boolean isRestart) {
+                if(!isWorking){
+                    return;
+                }
                 String systemName = getSystemName();
                 String ipAddress = getIpAddress();
                 long time = System.currentTimeMillis();
@@ -96,10 +103,16 @@ public class IdleListener implements ApplicationActivationListener, ApplicationL
     }
 
     private void showIdleNotification() {
+        if(!isWorking){
+            if (idleTimer.isRunning()) {
+                idleTimer.stop();
+            }
+            return;
+        }
         if (!notificationDisplayed) {
-
-            notificationDisplayed = true;
-            idleTimer.stop();
+            if (idleTimer.isRunning()) {
+                idleTimer.stop();
+            }
 
             Timer userResponseTimer = new Timer(USER_RESPONSE_TIMEOUT * 1000, e -> {
                 idleTimeStart = System.currentTimeMillis();
@@ -150,15 +163,9 @@ public class IdleListener implements ApplicationActivationListener, ApplicationL
             dialog.add(panel);
             dialog.setVisible(true);
 
-//            resetIdleTimer();
-//            notificationDisplayed = false;
-
-//            resetRandomIdleTimeout();
-//            idleTimer.setInitialDelay(randomIdleTimeoutMinutes * 60 * 1000);
-//            idleTimer.restart();
+            notificationDisplayed = true;
         }
     }
-
 
     private String getSystemName() {
         try {
@@ -178,10 +185,38 @@ public class IdleListener implements ApplicationActivationListener, ApplicationL
         }
     }
 
+    public void startWorking() {
+        isWorking = true;
+        resetIdleTimer();
+        ServerConnector serverConnector = new ServerConnector();
+        String systemName = getSystemName();
+        String ipAddress = getIpAddress();
+        long time = System.currentTimeMillis();
+        serverConnector.sendRestMessageToServer("/idle", systemName, ipAddress, time, "Activate", "");
+    }
+
+    public void stopWorking() {
+        isWorking = false;
+        if (idleTimer.isRunning()) {
+            idleTimer.stop();
+        }
+        ServerConnector serverConnector = new ServerConnector();
+        String systemName = getSystemName();
+        String ipAddress = getIpAddress();
+        long time = System.currentTimeMillis();
+        serverConnector.sendRestMessageToServer("/idle", systemName, ipAddress, time, "DeActivate", "");
+    }
+
+    public boolean iconStatus(){
+       return isWorking;
+    }
+
     @Override
     public void applicationActivated(@NotNull IdeFrame ideFrame) {
-        resetIdleTimer();
-        notificationDisplayed = false;
+        if (isWorking) {
+            resetIdleTimer();
+            notificationDisplayed = false;
+        }
     }
 
     @Override
