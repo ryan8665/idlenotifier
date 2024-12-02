@@ -13,7 +13,10 @@ public class ProjectStateNotifier implements ProjectManagerListener {
 
     @Override
     public void projectOpened(@NotNull Project project) {
-        // Your code when project opens
+        if (!IdleListener.getInstance().iconStatus()) {
+            return;
+        }
+
         System.out.println("Project opened: " + project.getName());
         String systemName = getSystemName();
         String ipAddress = getIpAddress();
@@ -24,6 +27,9 @@ public class ProjectStateNotifier implements ProjectManagerListener {
 
     @Override
     public void projectClosed(@NotNull Project project) {
+        if (!IdleListener.getInstance().iconStatus()) {
+            return;
+        }
         System.out.println("Project closed: " + project.getName());
         String systemName = getSystemName();
         String ipAddress = getIpAddress();

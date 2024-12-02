@@ -17,8 +17,8 @@ public class ServerConnector {
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json");
-            con.setConnectTimeout(5000);
-            con.setReadTimeout(5000);
+            con.setConnectTimeout(4000);
+            con.setReadTimeout(4000);
 
             String jsonInputString = String.format(
                     "{\"systemName\": \"%s\", \"ipAddress\": \"%s\", \"time\": \"%d\", \"status\": \"%s\", \"project\": \"%s\"}",
