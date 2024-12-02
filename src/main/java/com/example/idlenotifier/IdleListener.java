@@ -17,7 +17,7 @@ import java.net.InetAddress;
 import java.util.Random;
 
 public class IdleListener implements ApplicationActivationListener, ApplicationListener {
-    private static final int USER_RESPONSE_TIMEOUT = 30;
+    private static final int USER_RESPONSE_TIMEOUT = 60;
     private Timer idleTimer;
     private static boolean notificationDisplayed = false;
     private Long idleTimeStart;
@@ -85,7 +85,7 @@ public class IdleListener implements ApplicationActivationListener, ApplicationL
     }
 
     private void resetRandomIdleTimeout() {
-        randomIdleTimeoutMinutes = getRandomIdleTimeout(7, 13);
+        randomIdleTimeoutMinutes = getRandomIdleTimeout(8, 15);
     }
 
     private int getRandomIdleTimeout(int min, int max) {
@@ -118,7 +118,7 @@ public class IdleListener implements ApplicationActivationListener, ApplicationL
                 idleTimeStart = System.currentTimeMillis();
                 String systemName = getSystemName();
                 String ipAddress = getIpAddress();
-                long time = System.currentTimeMillis();
+                long time = System.currentTimeMillis()- (randomIdleTimeoutMinutes * 60 * 1000);
                 ServerConnector serverConnector = new ServerConnector();
                 serverConnector.sendRestMessageToServer("/idle", systemName, ipAddress, time, "DeActivate", "");
             });
