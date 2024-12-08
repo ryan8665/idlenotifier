@@ -1,4 +1,4 @@
-package com.example.idlenotifier;
+package com.saba.idlenotifier;
 
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.util.IconLoader;

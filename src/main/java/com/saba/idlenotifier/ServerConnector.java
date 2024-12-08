@@ -1,4 +1,4 @@
-package com.example.idlenotifier;
+package com.saba.idlenotifier;
 
 import java.io.OutputStream;
 import java.net.HttpURLConnection;

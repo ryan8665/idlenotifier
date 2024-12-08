@@ -1,13 +1,10 @@
-package com.example.idlenotifier;
+package com.saba.idlenotifier;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.project.ProjectManagerListener;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.InetAddress;
-import java.util.concurrent.TimeUnit;
 
 public class ProjectStateNotifier implements ProjectManagerListener {
 

@@ -1,10 +1,9 @@
-package com.example.idlenotifier;
+package com.saba.idlenotifier;
 
 import com.intellij.ide.AppLifecycleListener;
 import com.intellij.openapi.application.ApplicationActivationListener;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ApplicationListener;
-import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.wm.IdeFrame;
 import org.jetbrains.annotations.NotNull;
 
