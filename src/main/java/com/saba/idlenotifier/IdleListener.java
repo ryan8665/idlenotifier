@@ -14,8 +14,10 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.net.InetAddress;
 import java.util.Random;
+import java.util.prefs.Preferences;
 
 public class IdleListener implements ApplicationActivationListener, ApplicationListener {
+    private static final String REMOTE_WORK_STATUS_KEY = "remote_work_status";
     private static final int USER_RESPONSE_TIMEOUT = 60;
     private Timer idleTimer;
     private static boolean notificationDisplayed = false;
@@ -27,6 +29,7 @@ public class IdleListener implements ApplicationActivationListener, ApplicationL
     private static IdleListener instance;
 
     private IdleListener() {
+        isWorking = isWorkingRemotely();
         setupIdleDetection();
         ApplicationManager.getApplication().addApplicationListener(this);
 
@@ -99,6 +102,17 @@ public class IdleListener implements ApplicationActivationListener, ApplicationL
         resetRandomIdleTimeout();
         idleTimer.setInitialDelay(randomIdleTimeoutMinutes * 60 * 1000);
         idleTimer.restart();
+    }
+
+    private boolean isWorkingRemotely() {
+        Preferences prefs = Preferences.userNodeForPackage(IdleNotifierWidgetProvider.class);
+        return prefs.getBoolean(REMOTE_WORK_STATUS_KEY, false);
+    }
+
+
+    private void setWorkingRemotely(boolean isWorking) {
+        Preferences prefs = Preferences.userNodeForPackage(IdleNotifierWidgetProvider.class);
+        prefs.putBoolean(REMOTE_WORK_STATUS_KEY, isWorking);
     }
 
     private void showIdleNotification() {
@@ -185,6 +199,7 @@ public class IdleListener implements ApplicationActivationListener, ApplicationL
     }
 
     public void startWorking() {
+        setWorkingRemotely(true);
         isWorking = true;
         resetIdleTimer();
         ServerConnector serverConnector = new ServerConnector();
@@ -195,6 +210,7 @@ public class IdleListener implements ApplicationActivationListener, ApplicationL
     }
 
     public void stopWorking() {
+        setWorkingRemotely(false);
         isWorking = false;
         if (idleTimer.isRunning()) {
             idleTimer.stop();

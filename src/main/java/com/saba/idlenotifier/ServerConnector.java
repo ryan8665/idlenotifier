@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
 
 public class ServerConnector {
 
-    private static final String SERVER_URL = "http://192.168.221.20:8080/api";
+    private static final String SERVER_URL = "https://tw.sabapardazesh.net/api";
 
     public void sendRestMessageToServer(String endpoint, String systemName, String ipAddress, long time, String status, String additionalInfo) {
         try {
