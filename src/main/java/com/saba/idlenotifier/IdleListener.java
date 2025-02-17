@@ -4,14 +4,14 @@ import com.intellij.ide.AppLifecycleListener;
 import com.intellij.openapi.application.ApplicationActivationListener;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ApplicationListener;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.wm.IdeFrame;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.AWTEventListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.net.InetAddress;
 import java.util.Random;
 import java.util.prefs.Preferences;
@@ -87,7 +87,7 @@ public class IdleListener implements ApplicationActivationListener, ApplicationL
     }
 
     private void resetRandomIdleTimeout() {
-        randomIdleTimeoutMinutes = getRandomIdleTimeout(8, 15);
+        randomIdleTimeoutMinutes = getRandomIdleTimeout(10, 18);
     }
 
     private int getRandomIdleTimeout(int min, int max) {
@@ -116,12 +116,13 @@ public class IdleListener implements ApplicationActivationListener, ApplicationL
     }
 
     private void showIdleNotification() {
-        if(!isWorking){
+        if (!isWorking) {
             if (idleTimer.isRunning()) {
                 idleTimer.stop();
             }
             return;
         }
+
         if (!notificationDisplayed) {
             if (idleTimer.isRunning()) {
                 idleTimer.stop();
@@ -131,12 +132,11 @@ public class IdleListener implements ApplicationActivationListener, ApplicationL
                 idleTimeStart = System.currentTimeMillis();
                 String systemName = getSystemName();
                 String ipAddress = getIpAddress();
-                long time = System.currentTimeMillis()- (randomIdleTimeoutMinutes * 60 * 1000);
+                long time = System.currentTimeMillis() - (randomIdleTimeoutMinutes * 60 * 1000);
                 ServerConnector serverConnector = new ServerConnector();
                 serverConnector.sendRestMessageToServer("/idle", systemName, ipAddress, time, "DeActivate", "");
             });
             userResponseTimer.setRepeats(false);
-
             userResponseTimer.start();
 
             String message = String.format("System has been idle for %d minutes!", randomIdleTimeoutMinutes);
@@ -146,6 +146,9 @@ public class IdleListener implements ApplicationActivationListener, ApplicationL
             dialog.setSize(300, 150);
             dialog.setLocationRelativeTo(null);
             dialog.setAlwaysOnTop(true);
+            dialog.setModal(false);
+            dialog.toFront();
+            dialog.requestFocus();
 
             JPanel panel = new JPanel();
             panel.setLayout(new BorderLayout());
@@ -153,7 +156,7 @@ public class IdleListener implements ApplicationActivationListener, ApplicationL
             JLabel label = new JLabel(message, JLabel.CENTER);
             panel.add(label, BorderLayout.CENTER);
 
-            JButton okButton = new JButton("OK");
+            JButton okButton = new JButton("I'm Here");
             okButton.addActionListener(e -> {
                 dialog.dispose();
                 resetIdleTimer();
@@ -169,13 +172,24 @@ public class IdleListener implements ApplicationActivationListener, ApplicationL
             });
             panel.add(okButton, BorderLayout.SOUTH);
 
-            JPanel buttonPanel = new JPanel();
-            buttonPanel.add(okButton);
-            panel.add(buttonPanel, BorderLayout.SOUTH);
-
             dialog.add(panel);
-            dialog.setVisible(true);
 
+
+            dialog.addWindowFocusListener(new WindowFocusListener() {
+                @Override
+                public void windowGainedFocus(WindowEvent e) {
+                    dialog.toFront();
+                    dialog.requestFocus();
+                }
+
+                @Override
+                public void windowLostFocus(WindowEvent e) {
+                    dialog.toFront();
+                    dialog.requestFocus();
+                }
+            });
+
+            dialog.setVisible(true);
             notificationDisplayed = true;
         }
     }
@@ -200,6 +214,7 @@ public class IdleListener implements ApplicationActivationListener, ApplicationL
 
     public void startWorking() {
         setWorkingRemotely(true);
+        changeProjectStatus(true);
         isWorking = true;
         resetIdleTimer();
         ServerConnector serverConnector = new ServerConnector();
@@ -210,7 +225,7 @@ public class IdleListener implements ApplicationActivationListener, ApplicationL
     }
 
     public void stopWorking() {
-        setWorkingRemotely(false);
+
         isWorking = false;
         if (idleTimer.isRunning()) {
             idleTimer.stop();
@@ -220,6 +235,8 @@ public class IdleListener implements ApplicationActivationListener, ApplicationL
         String ipAddress = getIpAddress();
         long time = System.currentTimeMillis();
         serverConnector.sendRestMessageToServer("/idle", systemName, ipAddress, time, "DeActivate", "");
+        changeProjectStatus(false);
+        setWorkingRemotely(false);
     }
 
     public boolean iconStatus(){
@@ -237,5 +254,22 @@ public class IdleListener implements ApplicationActivationListener, ApplicationL
     @Override
     public void applicationDeactivated(@NotNull IdeFrame ideFrame) {
 
+    }
+
+    private  void changeProjectStatus(boolean status) {
+        ServerConnector serverConnector = new ServerConnector();
+        String systemName = getSystemName();
+        String ipAddress = getIpAddress();
+        long time = System.currentTimeMillis();
+        String projectStatus;
+        if(status){
+            projectStatus = "open";
+        }else {
+            projectStatus = "close";
+        }
+        Project[] openProjects = ProjectManager.getInstance().getOpenProjects();
+        for (Project openProject : openProjects) {
+            serverConnector.sendRestMessageToServer("/project", systemName, ipAddress, time, projectStatus, openProject.getName());
+        }
     }
 }

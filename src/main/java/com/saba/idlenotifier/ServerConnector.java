@@ -2,16 +2,19 @@ package com.saba.idlenotifier;
 
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.InetAddress;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.prefs.Preferences;
 
 public class ServerConnector {
-
+    private static final String REMOTE_WORK_STATUS_KEY = "remote_work_status";
     private static final String SERVER_URL = "https://tw.sabapardazesh.net/api";
 
     public void sendRestMessageToServer(String endpoint, String systemName, String ipAddress, long time, String status, String additionalInfo) {
         try {
+            if (!isWorkingRemotely()) {
+                return;
+            }
             String url = SERVER_URL + endpoint;
             URL obj = new URL(url);
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -41,4 +44,10 @@ public class ServerConnector {
             e.printStackTrace();
         }
     }
+
+    private boolean isWorkingRemotely() {
+        Preferences prefs = Preferences.userNodeForPackage(IdleNotifierWidgetProvider.class);
+        return prefs.getBoolean(REMOTE_WORK_STATUS_KEY, false);
+    }
+
 }

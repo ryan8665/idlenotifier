@@ -1,5 +1,6 @@
 package com.saba.idlenotifier;
 
+import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.wm.ToolWindow;
