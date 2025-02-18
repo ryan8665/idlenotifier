@@ -4,13 +4,20 @@ plugins {
 }
 
 group = "com.saba"
-version = "1.0"
+version = "1.3"
 
 repositories {
     mavenCentral()
 }
 
-// Configure Gradle IntelliJ Plugin
+dependencies {
+    implementation("org.eclipse.jetty:jetty-server:11.0.15")
+    implementation("org.eclipse.jetty:jetty-servlet:11.0.15")
+    implementation("jakarta.servlet:jakarta.servlet-api:5.0.0")
+}
+
+
+
 intellij {
     version.set("2023.2.6")
     type.set("IC") // Target IDE Platform

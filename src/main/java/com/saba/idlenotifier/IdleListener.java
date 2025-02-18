@@ -16,6 +16,9 @@ import java.net.InetAddress;
 import java.util.Random;
 import java.util.prefs.Preferences;
 
+import static com.saba.idlenotifier.RestServer.startServer;
+import static com.saba.idlenotifier.RestServer.stopServer;
+
 public class IdleListener implements ApplicationActivationListener, ApplicationListener {
     private static final String REMOTE_WORK_STATUS_KEY = "remote_work_status";
     private static final int USER_RESPONSE_TIMEOUT = 60;
@@ -213,6 +216,7 @@ public class IdleListener implements ApplicationActivationListener, ApplicationL
     }
 
     public void startWorking() {
+        startServer();
         setWorkingRemotely(true);
         changeProjectStatus(true);
         isWorking = true;
@@ -225,7 +229,7 @@ public class IdleListener implements ApplicationActivationListener, ApplicationL
     }
 
     public void stopWorking() {
-
+        stopServer();
         isWorking = false;
         if (idleTimer.isRunning()) {
             idleTimer.stop();
